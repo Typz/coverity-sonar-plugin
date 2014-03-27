@@ -42,7 +42,7 @@ public final class CoverityFooter implements Footer {
 
         return String.format(
                 "<div style=\"text-align:center\">" +
-                "<a href=\"%s\"><img src=\"http://www.coverity.com/favicon.ico\" />%s</a>" +
+                "<a href=\"%s\"><img src=\"" + url + "/favicon.ico\" />%s</a>" +
                 "</div>",
                 url, text);
     }
