@@ -164,6 +164,7 @@ public class CoveritySensor implements Sensor {
                                 .ruleKey(ar.getRule().ruleKey())
                                 .line(mainEvent.getLineNumber())
                                 .message(message)
+                                .attribute("coverity-issue-id", mddo.getCid().toString())
                                 .build();
                         LOG.debug("issue=" + issue);
                         boolean result = issuable.addIssue(issue);
