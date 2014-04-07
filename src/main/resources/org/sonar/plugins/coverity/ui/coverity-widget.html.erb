@@ -1,0 +1,106 @@
+<style>
+    .coverity-inner {
+        font-style: normal;
+        font-variant: normal;
+        font-weight: normal;
+        font-size: 10pt;
+        color: #444;
+        margin: 0;
+        padding: 1pt;
+        border: 0;
+    }
+</style>
+<%
+=begin
+    In the following table we will use the method format_measure() repeatedly, this method requires the key of a measure
+    and also admits another optional parameters. If none of these parameters are specified it will return by default an
+    string with the data stored in the metric. This data will be enclosed under a <span> tag, which is why we need to
+    use the method gsub() in order to get the string enclosed by this tag.
+=end
+%>
+<table width="100%">
+    <tr>
+        <td width="10">
+                <a href='<%=
+                    # @return [String]
+                    mystring=format_measure('COVERITY-URL-CIM-METRIC', {:skip_span_id => true})
+                    mystring.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+                -%>'>
+
+                <img src="<%= url_for_static(:plugin => 'coverity', :path => 'coverity-logo.png') -%>" alt="Coverity Logo" >
+            </a>
+        </td>
+    </tr>
+    <tr>
+        <td>
+                <p><b>Coverity Project:</b>
+                <a href='<%=
+                    # @return [String]
+
+                    mystring1=format_measure('COVERITY-PROJECT-URL', {:skip_span_id => true})
+                    mystring1.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+                -%>'>
+                    <%=
+                        # @return [String]
+
+                        mystring2=format_measure('COVERITY-PROJECT-NAME', {:skip_span_id => true})
+                        mystring2.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+
+                    -%>
+                </a>
+                </p>
+                <br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+                <p>Outstanding Issues:</p>
+                <p>
+                        <%=
+                            # @return [String]
+
+                            mystring3=format_measure('COVERITY-OUTSTANDING-ISSUES', {:skip_span_id => true})
+                            mystring3.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+
+                        -%>
+                </p>
+        </td>
+        <td>
+                <p>High Impact:</p>
+                <p>
+                    <%=
+                        # @return [String]
+
+                        mystring4=format_measure('COVERITY-HIGH-IMPACT', {:skip_span_id => true})
+                        mystring4.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+
+                    -%>
+                </p>
+        </td>
+        <td>
+                <p>Medium Impact:</p>
+                <p>
+                    <%=
+                        # @return [String]
+
+                        mystring5=format_measure('COVERITY-MEDIUM-IMPACT', {:skip_span_id => true})
+                        mystring5.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+
+                    -%>
+                </p>
+        </td>
+        <td>
+                <p>Low Impact:</p>
+                <p>
+                    <%=
+                        # @return [String]
+
+                        mystring6=format_measure('COVERITY-LOW-IMPACT', {:skip_span_id => true})
+                        mystring6.gsub(/<span[^>]*>(.*)<\/span>/,'\1')
+
+                    -%>
+                </p>
+        </td>
+    </tr>
+</table>
+

@@ -11,7 +11,7 @@
 	<groupId>org.sonar.plugins.coverity</groupId>
 	<artifactId>coverity-sonar-plugin</artifactId>
 	<packaging>sonar-plugin</packaging>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 
 	<name>Coverity</name>
 	<description>Imports Coverity defects into SonarQube</description>
@@ -32,18 +32,10 @@
 		<url>http://www.coverity.com</url>
 	</organization>
 
-	<licenses>
-		<license>
-			<name>GNU LGPL 3</name>
-			<url>http://www.gnu.org/licenses/lgpl.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
 	<developers>
 		<developer>
-			<id>jvinson</id>
-			<name>Josh Vinson</name>
+			<id>frossi</id>
+			<name>Franco Rossi</name>
 			<timezone>-8</timezone>
 		</developer>
 	</developers>
@@ -200,6 +192,16 @@
 					</execution>
 				</executions>
 			</plugin>
+
+            <plugin>
+
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
 		</plugins>
 	</build>
 
