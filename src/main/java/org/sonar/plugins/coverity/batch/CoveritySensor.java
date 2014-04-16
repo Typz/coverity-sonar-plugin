@@ -139,6 +139,12 @@ public class CoveritySensor implements Sensor {
             LOG.info("Found " + streamDefects.size() + " defects");
 
             for(MergedDefectDataObj mddo : defects) {
+                String status = mddo.getStatus();
+                if ("Dismissed".equals(status) || "Fixed".equals(status)) {
+                  LOG.info("Skipping resolved defect (CID " + mddo.getCid() + ", status '" + mddo.getStatus() + "')");
+                  continue;
+                }
+
                 String filePath = mddo.getFilePathname();
                 if (stripPrefix != null && !stripPrefix.isEmpty() && filePath.startsWith(stripPrefix))
                     filePath = "./" + filePath.substring(stripPrefix.length());
