@@ -178,7 +178,7 @@ public class CoveritySensor implements Sensor {
                 String filePath = mddo.getFilePathname();
                 if (stripPrefix != null && !stripPrefix.isEmpty() && filePath.startsWith(stripPrefix))
                     filePath = "./" + filePath.substring(stripPrefix.length());
-                Resource res = getResourceForFile(filePath, project.getFileSystem());
+                Resource res = getResourceForFile(filePath, project);
 
                 TripleFromDefects tripleFromMddo = new TripleFromDefects(mddo.getCheckerName(),
                         mddo.getCheckerSubcategory(), mddo.getDomain());
@@ -279,16 +279,13 @@ public class CoveritySensor implements Sensor {
         return null;
     }
 
-    protected Resource getResourceForFile(String filePath, ProjectFileSystem fileSystem) {
+    protected Resource getResourceForFile(String filePath, Project project) {
         File f = new File(filePath);
-        Resource ret;
-        ret = org.sonar.api.resources.JavaFile.fromIOFile(f, fileSystem.getSourceDirs(), false);
-        if(ret == null) {
-            ret = org.sonar.api.resources.File.fromIOFile(f, fileSystem.getSourceDirs());
-        } else {
-            // LOG.info("java file! : " + ret);
+        Resource ret = org.sonar.api.resources.File.fromIOFile(f, project);
+        if (ret == null) {
+          // support SQ<4.2
+          ret = org.sonar.api.resources.File.fromIOFile(f, project.getFileSystem().getTestDirs());
         }
-
         return ret;
     }
 
