@@ -36,17 +36,13 @@ public final class CoverityFooter implements Footer {
         String password = settings.getString(CoverityPlugin.COVERITY_CONNECT_PASSWORD);
         boolean ssl = settings.getBoolean(CoverityPlugin.COVERITY_CONNECT_SSL);
 
-        String covProject = settings.getString(CoverityPlugin.COVERITY_PROJECT);
-
-        CIMClient instance = new CIMClient(host, port, user, password, ssl);
-
-        ProjectDataObj covProjectObj=null;
-
+        Long covProjectKey = null;
         try {
-            covProjectObj = instance.getProject(covProject);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (CovRemoteServiceException_Exception e) {
+            final String covProject = settings.getString(CoverityPlugin.COVERITY_PROJECT);
+            CIMClient instance = new CIMClient(host, port, user, password, ssl);
+            ProjectDataObj covProjectObj = instance.getProject(covProject);
+            covProjectKey = covProjectObj.getProjectKey();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -59,8 +55,12 @@ public final class CoverityFooter implements Footer {
             serverUrl = url + "/";
             text = "Coverity";
         }
+        else if (covProjectKey == null) {
+            url = serverUrl;
+            text = "Coverity Connect";
+        }
         else {
-            url = serverUrl + "reports.htm#p" + covProjectObj.getProjectKey();
+            url = serverUrl + "reports.htm#p" + covProjectKey;
             text = "Coverity Connect";
         }
 
