@@ -31,6 +31,7 @@ import org.sonar.api.rules.ActiveRule;
 import org.sonar.api.rules.Rule;
 import org.sonar.plugins.coverity.CoverityPlugin;
 import org.sonar.plugins.coverity.base.CoverityPluginMetrics;
+import org.sonar.plugins.coverity.ui.CoverityFooter;
 import org.sonar.plugins.coverity.util.CoverityUtil;
 import org.sonar.plugins.coverity.ws.CIMClient;
 
@@ -114,6 +115,7 @@ public class CoveritySensor implements Sensor {
         ProjectDataObj covProjectObj = null;
         try {
             covProjectObj = instance.getProject(covProject);
+            CoverityFooter.covProjectObjFooter = covProjectObj;
             LOG.info("Found project: " + covProject + " (" + covProjectObj.getProjectKey() + ")");
 
             if(covProjectObj == null) {
@@ -159,6 +161,8 @@ public class CoveritySensor implements Sensor {
 
             LOG.info("Found " + streamDefects.size() + " defects");
 
+            int notIssuableCounter = 0;
+
             for(MergedDefectDataObj mddo : defects) {
                 String status = mddo.getStatus();
 
@@ -203,13 +207,21 @@ public class CoveritySensor implements Sensor {
                     continue;
                 }
 
+                Issuable issuable = null;
+
                 for(DefectInstanceDataObj dido : streamDefects.get(mddo.getCid()).getDefectInstances()) {
                     //find the main event, so we can use its line number
                     EventDataObj mainEvent = getMainEvent(dido);
 
-                    Issuable issuable = resourcePerspectives.as(Issuable.class, res);
+                    issuable = resourcePerspectives.as(Issuable.class, res);
+
+                    if(issuable == null){
+                        notIssuableCounter = ++notIssuableCounter;
+                        LOG.info("This defect is not issuable: "+ mddo.getCid() + ":" + dido.getId().getId() + ":" + notIssuableCounter);
+                    }
 
                     org.sonar.api.resources.Language lang = res.getLanguage();
+                    // This is a way to introduce support for community c++
                     if (lang == null) {
                         lang = project.getLanguage();
                     }
@@ -223,10 +235,10 @@ public class CoveritySensor implements Sensor {
                         LOG.debug("instance=" + instance);
                         LOG.debug("ar.getRule()=" + ar.getRule());
                         LOG.debug("covProjectObj=" + covProjectObj);
-                        LOG.debug("mddo=" + mddo);
-                        LOG.debug("dido=" + dido);
+                        LOG.debug("mddo=" + mddo.getCid());
+                        LOG.debug("dido=" + dido.getId());
                         LOG.debug("ar.getRule().getDescription()=" + ar.getRule().getDescription());
-                        String message = getIssueMessage(instance, ar.getRule(), covProjectObj, mddo, dido);
+                        String message = getIssueMessage(instance, ar.getRule(), covProjectObj, mddo);
 
                         Issue issue = issuable.newIssueBuilder()
                                 .ruleKey(ar.getRule().ruleKey())
@@ -256,7 +268,7 @@ public class CoveritySensor implements Sensor {
         getCoverityLogoMeasures(sensorContext, instance, covProjectObj);
     }
 
-    protected String getIssueMessage(CIMClient instance, Rule rule, ProjectDataObj covProjectObj, MergedDefectDataObj mddo, DefectInstanceDataObj dido) throws CovRemoteServiceException_Exception, IOException {
+    protected String getIssueMessage(CIMClient instance, Rule rule, ProjectDataObj covProjectObj, MergedDefectDataObj mddo) throws CovRemoteServiceException_Exception, IOException {
         String url = getDefectURL(instance, covProjectObj, mddo);
 
         LOG.debug("rule:" + rule);
@@ -265,8 +277,9 @@ public class CoveritySensor implements Sensor {
         return rule.getDescription() + "\n\nView in Coverity Connect: \n" + url;
     }
 
+    //Replacing "#" for "&" in order to fix bug 62066.
     protected String getDefectURL(CIMClient instance, ProjectDataObj covProjectObj, MergedDefectDataObj mddo) {
-        return String.format("%s://%s:%d/sourcebrowser.htm?projectId=%s#mergedDefectId=%d",
+        return String.format("%s://%s:%d/sourcebrowser.htm?projectId=%s&mergedDefectId=%d",
                 instance.isUseSSL() ? "https" : "http", instance.getHost(), instance.getPort(), covProjectObj.getProjectKey(), mddo.getCid());
     }
 
@@ -279,13 +292,10 @@ public class CoveritySensor implements Sensor {
         return null;
     }
 
-    protected Resource getResourceForFile(String filePath, Project project) {
+    protected Resource getResourceForFile(String filePath, Project module) {
         File f = new File(filePath);
-        Resource ret = org.sonar.api.resources.File.fromIOFile(f, project);
-        if (ret == null) {
-          // support SQ<4.2
-          ret = org.sonar.api.resources.File.fromIOFile(f, project.getFileSystem().getTestDirs());
-        }
+        Resource ret;
+        ret = org.sonar.api.resources.File.fromIOFile(f, module);
         return ret;
     }
 

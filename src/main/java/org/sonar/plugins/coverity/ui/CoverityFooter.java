@@ -11,18 +11,16 @@
 
 package org.sonar.plugins.coverity.ui;
 
-import com.coverity.ws.v6.CovRemoteServiceException_Exception;
 import com.coverity.ws.v6.ProjectDataObj;
 import org.sonar.api.config.Settings;
 import org.sonar.api.web.Footer;
-import org.sonar.plugins.coverity.CoverityPlugin;
 import org.sonar.plugins.coverity.util.CoverityUtil;
-import org.sonar.plugins.coverity.ws.CIMClient;
-
-import java.io.IOException;
 
 public final class CoverityFooter implements Footer {
     Settings settings;
+    // This object is set up by CoveritySensor and then used to create a footer sending the user to his cim instance.
+    // If this object is null, the footer will redirect the user to www.coverity.com.
+    public static ProjectDataObj covProjectObjFooter;
 
     public CoverityFooter(Settings settings) {
         this.settings = settings;
@@ -30,38 +28,17 @@ public final class CoverityFooter implements Footer {
 
     public String getHtml() {
 
-        String host = settings.getString(CoverityPlugin.COVERITY_CONNECT_HOSTNAME);
-        int port = settings.getInt(CoverityPlugin.COVERITY_CONNECT_PORT);
-        String user = settings.getString(CoverityPlugin.COVERITY_CONNECT_USERNAME);
-        String password = settings.getString(CoverityPlugin.COVERITY_CONNECT_PASSWORD);
-        boolean ssl = settings.getBoolean(CoverityPlugin.COVERITY_CONNECT_SSL);
-
-        Long covProjectKey = null;
-        try {
-            final String covProject = settings.getString(CoverityPlugin.COVERITY_PROJECT);
-            CIMClient instance = new CIMClient(host, port, user, password, ssl);
-            ProjectDataObj covProjectObj = instance.getProject(covProject);
-            covProjectKey = covProjectObj.getProjectKey();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String url = null;
+        String text = null;
 
         String serverUrl = CoverityUtil.createURL(settings);
-        String url;
-        String text;
-
-        if(serverUrl == null) {
-            url = "http://coverity.com";
+        if(covProjectObjFooter != null){
+            url = serverUrl + "reports.htm#p" + covProjectObjFooter.getProjectKey();
+            text = "Coverity Connect";
+        } else {
+            url = "http://www.coverity.com";
             serverUrl = url + "/";
             text = "Coverity";
-        }
-        else if (covProjectKey == null) {
-            url = serverUrl;
-            text = "Coverity Connect";
-        }
-        else {
-            url = serverUrl + "reports.htm#p" + covProjectKey;
-            text = "Coverity Connect";
         }
 
         return String.format(

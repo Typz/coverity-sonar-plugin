@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @WidgetCategory("Coverity")
+@Description("Displays the breakdown of outstanding Coverity defects by impact.")
 public class CoverityWidget extends AbstractRubyTemplate implements RubyRailsWidget {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoverityWidget.class);
