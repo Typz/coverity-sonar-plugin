@@ -21,7 +21,6 @@ import org.sonar.plugins.coverity.batch.CoveritySensor;
 import org.sonar.plugins.coverity.server.CoverityProfiles;
 import org.sonar.plugins.coverity.server.CoverityRules;
 import org.sonar.plugins.coverity.server.CoverityRulesRepositories;
-import org.sonar.plugins.coverity.ui.CoverityFooter;
 import org.sonar.plugins.coverity.ui.CoverityWidget;
 
 import java.util.List;
@@ -109,9 +108,6 @@ public final class CoverityPlugin extends SonarPlugin {
                 CoverityRules.class,
                 CoverityRulesRepositories.class,
                 CoverityProfiles.class,
-
-                //UI
-                CoverityFooter.class,
 
                 //UI
                 CoverityWidget.class,

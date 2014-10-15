@@ -26,11 +26,11 @@ import org.sonar.api.measures.Measure;
 import org.sonar.api.profiles.RulesProfile;
 import org.sonar.api.resources.Project;
 import org.sonar.api.resources.ProjectFileSystem;
+import org.sonar.api.resources.ProjectLink;
 import org.sonar.api.resources.Resource;
 import org.sonar.api.rules.ActiveRule;
 import org.sonar.api.rules.Rule;
 import org.sonar.plugins.coverity.CoverityPlugin;
-import org.sonar.plugins.coverity.ui.CoverityFooter;
 import org.sonar.plugins.coverity.util.CoverityUtil;
 import org.sonar.plugins.coverity.ws.CIMClient;
 
@@ -110,7 +110,6 @@ public class CoveritySensor implements Sensor {
         ProjectDataObj covProjectObj = null;
         try {
             covProjectObj = instance.getProject(covProject);
-            CoverityFooter.covProjectObjFooter = covProjectObj;
             LOG.info("Found project: " + covProject + " (" + covProjectObj.getProjectKey() + ")");
 
             if(covProjectObj == null) {
@@ -118,6 +117,10 @@ public class CoveritySensor implements Sensor {
                 Thread.currentThread().setContextClassLoader(oldCL);
                 return;
             }
+
+            sensorContext.saveLink(new ProjectLink("coverity", "Coverity",
+                CoverityUtil.createURL(this.settings) + "reports.htm#p" + covProjectObj.getProjectKey()));
+
         } catch(Exception e) {
             LOG.error("Error while trying to find project: " + covProject);
             Thread.currentThread().setContextClassLoader(oldCL);
